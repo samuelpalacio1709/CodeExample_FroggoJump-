@@ -8,16 +8,13 @@ public class FrogController : MonoBehaviour
 {
 
     [SerializeField] float forceMultiplier = 2f;
+
     private Vector3 mousePressDownPos;
     private Vector3 mouseReleasePos;
-    private Rigidbody rb;
     private Vector3 apliedForce;
-    private float actualSpeed;
-    public Vector3 playerPos;
-
-    private bool isShoot;
-    bool canJump = true;
-    float xMax;
+    private Rigidbody rb;
+    private float initialVelocity;
+    private bool canJump = true;
 
     private void Awake()
     {
@@ -36,8 +33,21 @@ public class FrogController : MonoBehaviour
         if (canJump)
         {
             apliedForce = (mousePressDownPos - Input.mousePosition) * 0.01f * forceMultiplier;
-            Vector3 endPos = GetEndPoint(apliedForce.magnitude);
-            actualSpeed = PhysicsFormulas.GetInitialVelocity(endPos, this.gameObject);
+        
+            Vector3 endPos = PhysicsFormulas.GetEndPoint(apliedForce.magnitude, this.transform);
+            initialVelocity = PhysicsFormulas.GetInitialVelocity(endPos, this.gameObject);
+
+            if (apliedForce.y >= 0.5)
+            {
+                Path.active = true;
+                Path.endPosition = endPos;
+                Path.highestPoint = PhysicsFormulas.GetHighestPoint(apliedForce.magnitude, this.transform);
+
+                float angle  = PhysicsFormulas.GetAngle(mousePressDownPos, Input.mousePosition);
+                rb.transform.eulerAngles = new Vector3(this.transform.rotation.x, angle, this.transform.rotation.z);
+
+
+            }
         }
     }
 
@@ -45,35 +55,31 @@ public class FrogController : MonoBehaviour
     {
         if (canJump)
         {
+            if (apliedForce.magnitude >= 4f && ((mousePressDownPos.y - 0.5f) >= mouseReleasePos.y))
+            {
+                canJump = false;
                 mouseReleasePos = Input.mousePosition;
-                Shoot(actualSpeed, PhysicsFormulas.GetAngle(mousePressDownPos, mouseReleasePos));       
+                StartCoroutine(ActivateJump(PhysicsFormulas.GetTime(initialVelocity)));
+                Jump(initialVelocity);
+            }
+                 
+                
+                 Path.active = false;
+
         }
     }
 
-    public void Shoot(float vo, float a)
+    public void Jump(float vo)
     {
-        if (isShoot) return;
-        canJump = false;
-
-        if (apliedForce.y >= 0)
-        {
-            canJump = false;
-            rb.transform.eulerAngles = new Vector3(this.transform.rotation.x, a, this.transform.rotation.z);
-            rb.velocity = (transform.TransformDirection(new Vector3(0, (vo) * Mathf.Sin(45), (vo) * Mathf.Cos(45))));
-            rb.transform.eulerAngles = new Vector3(this.transform.rotation.x, 0, this.transform.rotation.z);
-            apliedForce = Vector3.zero;
-            actualSpeed = 0;
-        }
-
+       rb.velocity = (transform.TransformDirection(new Vector3(0, (vo) * Mathf.Sin(45), (vo) * Mathf.Cos(45))));
+       rb.transform.eulerAngles = new Vector3(this.transform.rotation.x, 0, this.transform.rotation.z);
+        
     }
 
-    public Vector3 GetEndPoint(float v0)
+    IEnumerator ActivateJump(float time)
     {
-        Vector3 endPos;
-        xMax = (-v0 * PhysicsFormulas.GetTime(v0)) / 2;
-        endPos = (new Vector3((transform.forward.x * xMax - 0.2f) + this.transform.position.x, transform.forward.y + 0.65f, (transform.forward.z * xMax - 0.2f) + this.transform.position.z));
-
-        return endPos;
+        yield return new WaitForSeconds(time);
+        rb.velocity = Vector3.zero;
+        canJump = true;
     }
-
 }
