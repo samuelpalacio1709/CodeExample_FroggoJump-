@@ -43,7 +43,6 @@ public class PhysicsFormulas
             signedAngle = (Mathf.Atan2(oppositeSide, adjacentSide) * Mathf.Rad2Deg);
 
         }
-        Debug.Log(signedAngle);
 
         return signedAngle;
     }

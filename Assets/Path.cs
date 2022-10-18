@@ -6,60 +6,53 @@ public class Path : MonoBehaviour
 {
 
     [SerializeField] Material lineRenderMaterial;
-    public Transform frogTransform;
-    Vector3 point2;
-    Vector3 point3;
-    Color invisible;
+    private Transform frogTransform;
     public static Vector3 highestPoint;
     public static Vector3 endPosition;
-    static LineRenderer lineRenderer;
-    List<Vector3> pointList;
-
-    public int dotCount = 12;
+    private static LineRenderer lineRenderer;
     public static bool active;
+    public int dotCount = 9;
+    private List<Vector3> pointList;
+
     private void Awake()
     {
         pointList = new List<Vector3>();
         TryGetComponent(out lineRenderer);
-        Clear();
-    }
-
-    private void Start()
-    {
         lineRenderer.widthMultiplier = 0;
-        invisible = new Color(0, 0, 0, 0);
+        frogTransform = this.transform;
+        Deactivate();
     }
 
     void Update()
     {
-        if (active)
+        if (!active) return;
+        
+        pointList.Clear();
+        for (float ratio = 0; ratio <= dotCount; ratio += 1.0f / dotCount)
         {
-            lineRenderer.widthMultiplier = 1;
-            point2 = Vector3.Lerp(frogTransform.position, highestPoint, 1);
-            point3 = Vector3.Lerp(frogTransform.position, endPosition, 1);
-            pointList.Clear();
-            int count = 0;
-            for (float ratio = 0; ratio <= 1; ratio += 1.0f / dotCount)
-            {
-                var tangentLineVertex1 = Vector3.Lerp(frogTransform.position, point2, ratio); 
-                var tangentLineVertex2 = Vector3.Lerp(point2, point3, ratio);
-                var bezierpoint = Vector3.Lerp(tangentLineVertex1, tangentLineVertex2, ratio); // interpolacion entre ambas lineas
-                pointList.Add(bezierpoint);
-                count++;
-            }
-            lineRenderer.positionCount = pointList.Count;
-            lineRenderer.SetPositions(pointList.ToArray());
-
+            Vector3 tangentLineVertex1 = Vector3.Lerp(frogTransform.position, highestPoint, ratio);
+            Vector3 tangentLineVertex2 = Vector3.Lerp(highestPoint, endPosition, ratio);
+            Vector3 bezierpoint = Vector3.Lerp(tangentLineVertex1, tangentLineVertex2, ratio);
+            pointList.Add(bezierpoint);
         }
-        else
-        {
-            Clear();
-        }
+        Debug.Log(pointList.Count);
+        lineRenderer.positionCount = pointList.Count;
+        lineRenderer.SetPositions(pointList.ToArray());
     }
-    public static void Clear()
-    {
-        lineRenderer.widthMultiplier = 0;
 
+    public static void Activate(Vector3 endPos, Vector3 highestP)
+    {
+        active = true;
+        endPosition = endPos;
+        highestPoint = highestP;
+        lineRenderer.widthMultiplier = 1;
+
+    }
+
+    public static void Deactivate()
+    {
+        active = false;
+        lineRenderer.widthMultiplier = 0;
 
     }
 

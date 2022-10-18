@@ -266,8 +266,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderMaterial: {fileID: 2100000, guid: d064c495ad55b7c4da7c09b59d4ec8de, type: 2}
-  frogTransform: {fileID: 8792224}
-  dotCount: 12
+  dotCount: 9
 --- !u!120 &8792228
 LineRenderer:
   m_ObjectHideFlags: 0

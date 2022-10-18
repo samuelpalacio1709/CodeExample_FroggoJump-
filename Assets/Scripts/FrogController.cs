@@ -39,9 +39,9 @@ public class FrogController : MonoBehaviour
 
             if (apliedForce.y >= 0.5)
             {
-                Path.active = true;
-                Path.endPosition = endPos;
-                Path.highestPoint = PhysicsFormulas.GetHighestPoint(apliedForce.magnitude, this.transform);
+              
+                Vector3 highestPoint = PhysicsFormulas.GetHighestPoint(apliedForce.magnitude, this.transform);
+                Path.Activate(endPos,highestPoint);
 
                 float angle  = PhysicsFormulas.GetAngle(mousePressDownPos, Input.mousePosition);
                 rb.transform.eulerAngles = new Vector3(this.transform.rotation.x, angle, this.transform.rotation.z);
@@ -62,9 +62,9 @@ public class FrogController : MonoBehaviour
                 StartCoroutine(ActivateJump(PhysicsFormulas.GetTime(initialVelocity)));
                 Jump(initialVelocity);
             }
-                 
-                
-                 Path.active = false;
+
+
+            Path.Deactivate();
 
         }
     }
