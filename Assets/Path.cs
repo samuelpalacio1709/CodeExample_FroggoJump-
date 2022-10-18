@@ -35,7 +35,6 @@ public class Path : MonoBehaviour
             Vector3 bezierpoint = Vector3.Lerp(tangentLineVertex1, tangentLineVertex2, ratio);
             pointList.Add(bezierpoint);
         }
-        Debug.Log(pointList.Count);
         lineRenderer.positionCount = pointList.Count;
         lineRenderer.SetPositions(pointList.ToArray());
     }
